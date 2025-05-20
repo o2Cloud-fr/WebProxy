@@ -1,0 +1,1 @@
+npm install http https net url fs path mysql2 express body-parser express-session bcrypt ws wss
