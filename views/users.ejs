@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Utilisateurs - Proxy Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex min-h-screen">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-md h-screen sticky top-0">
+    <div class="p-4 text-xl font-semibold border-b border-gray-200">Admin Panel</div>
+    <nav class="p-4 space-y-2">
+      <a href="/dashboard" class="flex items-center text-gray-700 hover:text-blue-600">
+        <i class="bi bi-speedometer2 mr-2"></i> Dashboard
+      </a>
+      <a href="/users" class="flex items-center text-blue-600 font-semibold">
+        <i class="bi bi-people mr-2"></i> Utilisateurs
+      </a>
+      <!-- Ajoute d'autres liens ici -->
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 p-6">
+    <h1 class="text-3xl font-bold mb-6">Gestion des utilisateurs</h1>
+
+    <% if (message) { %>
+      <div class="mb-4 bg-blue-100 border border-blue-200 text-blue-700 px-4 py-3 rounded relative" role="alert">
+        <span class="block sm:inline"><%= message %></span>
+        <button type="button" class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.remove()">
+          <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M14.348 14.849a1.2 1.2 0 01-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 11-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 111.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 111.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 010 1.698z"/></svg>
+        </button>
+      </div>
+    <% } %>
+
+    <!-- Formulaire d'ajout -->
+    <div class="bg-white shadow rounded-lg mb-6">
+      <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+        <h2 class="text-lg font-semibold text-gray-700">Ajouter un utilisateur</h2>
+      </div>
+      <div class="p-4">
+        <form action="/users/add" method="POST" class="flex flex-wrap gap-3">
+          <div class="w-full md:w-1/4">
+            <input type="text" name="username" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Nom d'utilisateur" required>
+          </div>
+          <div class="w-full md:w-1/4">
+            <input type="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Mot de passe" required>
+          </div>
+          <div class="w-full md:w-1/4">
+            <select name="role_id" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+              <% roles.forEach(role => { %>
+                <option value="<%= role.id %>"><%= role.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="w-full md:w-1/12 flex items-center">
+            <label class="inline-flex items-center">
+              <input type="checkbox" name="active" class="rounded text-blue-600"> 
+              <span class="ml-2 text-gray-700">Actif</span>
+            </label>
+          </div>
+          <div class="w-full md:w-1/12">
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md">
+              Ajouter
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Liste des utilisateurs -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+        <h2 class="text-lg font-semibold text-gray-700">Liste des utilisateurs</h2>
+      </div>
+      <div class="p-4 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+            <tr>
+              <th class="px-4 py-3 text-left">Nom</th>
+              <th class="px-4 py-3 text-left">Rôle</th>
+              <th class="px-4 py-3 text-left">Actif</th>
+              <th class="px-4 py-3 text-left">Dernière connexion</th>
+              <th class="px-4 py-3 text-left">Mot de passe</th>
+              <th class="px-4 py-3 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <% users.forEach(user => { %>
+              <tr>
+                <form action="/users/edit/<%= user.id %>" method="POST">
+                  <td class="px-4 py-2">
+                    <input type="text" name="username" class="w-full px-2 py-1 border border-gray-300 rounded-md" value="<%= user.username %>">
+                  </td>
+                  <td class="px-4 py-2">
+                    <select name="role_id" class="w-full px-2 py-1 border border-gray-300 rounded-md">
+                      <% roles.forEach(role => { %>
+                        <option value="<%= role.id %>" <%= role.id === user.role_id ? 'selected' : '' %>><%= role.name %></option>
+                      <% }); %>
+                    </select>
+                  </td>
+                  <td class="px-4 py-2 text-center">
+                    <input type="checkbox" name="active" <%= user.active ? 'checked' : '' %> class="rounded text-blue-600">
+                  </td>
+                  <td class="px-4 py-2 text-sm text-gray-500">
+                    <%= user.last_login ? new Date(user.last_login).toLocaleString() : 'Jamais' %>
+                  </td>
+                  <td class="px-4 py-2">
+                    <input type="password" name="password" class="w-full px-2 py-1 border border-gray-300 rounded-md" placeholder="Laisser vide">
+                  </td>
+                  <td class="px-4 py-2 flex gap-1">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm">
+                      Modifier
+                    </button>
+                    <% if (user.id !== user.id_session) { %>
+                      <a href="/users/delete/<%= user.id %>" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm"
+                         onclick="return confirm('Supprimer cet utilisateur ?');">Supprimer</a>
+                    <% } else { %>
+                      <span class="text-gray-400">-</span>
+                    <% } %>
+                  </td>
+                </form>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
